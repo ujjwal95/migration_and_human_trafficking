@@ -108,20 +108,21 @@ The issue that we wanted to target was the current migrant and human trafficking
 
 ### 1.1 Why we chose this topic. 
 
-The primary interest of us choosing this topic to work on was to understand how human trafficking and migration incidents are affecting the world and how big of an issue is human trafficking to the world. There are approximately 258 million people not living in their country of birth. Due to the sudden rise in hostility to migration, the illegal routes of human trafficking are becoming more and more prominent. 
+The primary interest of us choosing this topic to work on was to understand how human trafficking and migration incidents are affecting the world and how big of an issue it is to the world. There are approximately 258 million people not living in their country of birth. Due to the sudden rise in hostility to migration, the illegal routes of human trafficking are becoming more and more prominent. 
 
 Some of the questions that we wanted to explore with this data were as follows:
 
 * Which countries have the most fatalities in the migration.
 * Which countries face the most illegal trafficking and which countries do people traffick to the most.
+* Is there any trend in the victims that are trafficked.
 * How have the traffcking trends changed over time.
 and so on...
 
 ### 1.2 Team Members and contributions:
 
-* Akshata Patel: Akshata worked on the exploratory data analysis of the dataset.
+* Akshata Patel: Akshata worked on the exploratory data analysis of the human trafficking dataset.
 * Kiran Saini: Kiran worked on creating the interactive component of the project using D3.
-* Ujjwal Peshin: Ujjwal worked on the exploratory data analysis of the dataset.
+* Ujjwal Peshin: Ujjwal worked on the exploratory data analysis of the migration dataset.
 
 
 ## 2. DESCRIPTION OF DATA
@@ -189,7 +190,7 @@ extracat::visna(data, sort = 'b')
 ```
 #### 3.1.2 Unequal Age Intervals
 
-The Age column gives the age of teh victim at the time of the exploitation. It contains levels: 
+The Age column gives the age of the victim at the time of the exploitation. It contains levels: 
 ```{r}
 unique(data$Age)
 ```
@@ -391,7 +392,7 @@ ggplotly(p)
 
 ```
 
-This cleveland plot shows the count of victims of the age group 18 to 26 with the country of exploitation. This shows that the countries: United States, Ukraine, Maldova,Russia,Indonesia have the highest number of cases of exploitation. The count of victims in top three countries are a lot larger than the other country counts.
+This cleveland plot shows the count of victims of the age group 18 to 26 with the country of exploitation. 
 
 ```{r}
 small_data <- data[58:61]
@@ -937,7 +938,7 @@ data_new$Age<-sapply(data_new$Age,create_age_new)
 data_new$Age<-factor(data_new$Age,levels=c("0--8","9--17","18--26","27--38","39--47","48+"))
 ```
 
-```{r fig.width=10}
+```{r fig.width=10 ,echo=FALSE}
 f <- factor(data$AgeCategory)
 data$AgeCategory <- fct_relevel(f, "Minor")
 
@@ -948,12 +949,39 @@ p <-  ggplot() +
   facet_wrap(. ~ gender, scales = "free") +
   xlab("") +
   ylab("") +
-  ggtitle("Count of People Trafficked by Gender")
+  ggtitle("Count of People Trafficked by Gender") +
+  scale_fill_colorblind()
 
 ggplotly(p) %>% layout(legend = list(orientation = "h", y = -0.25, x = 0.30))
 ```
 
-```{r}
+The graph shows the count of the people trafficked categorised by their gender. Each gender is then grouped by their Age. We can see that there are a lot of unkowns which means that the data has missing data which may be due to negligence while filling the survey forms or this data may be lost. 
+We can see that the count of female victims that are trafficked is much larger than the number of male victims(consider the scales of each plot separately). Among females, minors,due to their innocence, are more susceptible to human trafficking than adults.
+
+```{r fig.height=8, fig.width=10,echo=FALSE}
+data_mosaic <- data %>% filter(typeOfExploitConcatenated!="Forced labour;Sexual exploitation;Combined sexual and labour exploitation" & typeOfExploitConcatenated!="Forced labour;Slavery and similar practices" & typeOfExploitConcatenated!="Other")
+
+data_mosaic$typeOfExploitConcatenated <- factor(data_mosaic$typeOfExploitConcatenated,levels=c("Forced labour","Forced marriage","Sexual exploitation","Slavery and similar practices" ))
+
+data_mosaic$gender <- factor(data_mosaic$gender,levels=c("Female","Male") )
+data_mosaic$AgeCategory <- factor(data_mosaic$AgeCategory,levels=c("Minor","Adult"))
+
+p<-ggplot(data = data_mosaic) +
+   geom_mosaic(aes(x = product(gender,typeOfExploitConcatenated),conds=product(AgeCategory), fill=typeOfExploitConcatenated), na.rm=TRUE) +
+  # facet_grid(AgeCategory~.) +
+   ggtitle("Type of Exploitation By Gender And Age") +
+   xlab("") +
+   ylab("") +
+   theme(legend.title=element_blank()) +
+   scale_fill_colorblind()
+ 
+
+ggplotly(p) %>% layout(legend = list(orientation = "h", y = -0.25, x = 0.30))
+
+```
+ This plot shows the proportions of abuse performed on different classes of victims(Females and Males: Minors and Adults). It shows that sexual abuse is the most common form of abuse among females(as it has a larger area/width in the plot),whereas forced labour is the most common in males victims. 
+ 
+```{r ,echo=FALSE}
 
 recruiter_rel_hospitality <- read.csv("./data/Recruiter relationship hospitality sector.csv", na.strings = "-99")
 #tidy_recruiter_rel_hospitality <- recruiter_rel_hospitality %>% gather(key="Key",value="Value",-Relationship.with.recruiter)
@@ -986,11 +1014,36 @@ p <- ggplot() + geom_bar(data = recruiter_data %>% filter(recruiter_data$In_Out=
      ggtitle("Recruiter Relation by Industry") +
     coord_flip() +
     xlab("") +
-    ylab("Percent of Victims") 
+    ylab("Percent of Victims") +
+  scale_fill_colorblind()
    # facet_wrap(. ~ In_Out, ncol = 2)
 ggplotly(p) %>% layout(legend = list(orientation = "h", y = -0.25, x = 0.30))
 
 ```
+ The grpah shows the relationship of the recruiter/trafficker(i.e the person who coerces/trafficks the victims) with the victim in different sectors or industries. It can be seen that a large percent(approximately 25%) of the vitims already know the perpetuator of the crime. The trafficker (for a major portion) is a family memeber or a friend. A significant amount of victims are trafficked by their intimate partner. This percent of known recruiters are greater in the hospitality sector than the other sectors. The second is that of domestic abuse.
+ 
+```{r , fig.height=7,echo=FALSE}
+
+data_filtered<-data_new %>% filter(CountryOfExploitation!="-99")
+data_filtered<-data_filtered %>% filter(Age=="18--26")
+data_count_country <- data_filtered %>% group_by(CountryOfExploitation) %>% summarize(count=n())
+
+Country_Of_Exploitation<-reorder(data_count_country$CountryOfExploitation,data_count_country$count)
+
+p<-ggplot(data_count_country)+
+  geom_point(aes(x=Country_Of_Exploitation,y=count))+
+  xlab("Country of Exploitation")+
+  ylab("Count of Victims with Age 18-26")+
+  scale_y_continuous(breaks=seq(0,4000,500))+
+  coord_flip()+
+  ggtitle("Number of Victims(Age 18-26) in Various Countries")+
+  scale_color_colorblind()
+  
+
+ggplotly(p)
+```
+
+This graph shows the number of victims of the Age group 18-26 in different countries. This shows that the countries: United States, Ukraine, Maldova, Russia, Indonesia have the highest number of cases of exploitation. The count of victims in top three countries are a lot larger than the other country counts. 
 
 ### 5.2 Missing Migrants dataset
 
@@ -1069,20 +1122,38 @@ ggplot() +
 
 The US-Mexico border and the Mediterranean area is the most active area in terms of migrant incidents. Most of the incidents correspond to the border of a lesser privilaged country to a greater privilaged country.
 
-## 6. CONCLUSION
+## 6. INTERACTIVE COMPONENT
 
-### 6.1 Future Directions
+The trafficking by country interactive component can be used to analyse trends and statistics in trafficking by country.
+Victims of trafficking are mapped by region. Each circle represents victims of trafficking in a country. The size of the circles represent a range of number of victims. Refer to legend to comprehend number of victims in each region. Red circles represent victims in the country of exploitation. Blue circles represent victims in country of citizenship. Countries may have a red and blue circle if they have victims coming into the country and going out of the country.
+
+The trafficking by time component is an animation of trafficking by year.
+Each blue circle represents 10 victims of trafficking at country of citizenship. Each red circle represents 10 victims of trafficking at country of exploitation. The circles transition from blue to red as the victims move from country of citizenship to country of exploitation. Each year is represented by a 5 second interval. The number of victims and the countries involved in trafficking change over time.
+
+### Link for the Interactive Component : https://bl.ocks.org/akshatapatel/raw/97326ed42c9d5e29ca6986e87d656146/index.html
+
+Link to the gist : https://gist.github.com/akshatapatel/97326ed42c9d5e29ca6986e87d656146
+
+## 7. CONCLUSION
+
+### 7.1 Future Directions
 
 Some future directions might be to link both of the data sources together to get a list of possible illegal migrant incidents, or a possible variable which can distinguish in legal and illegal migrantion incidents. 
 
-### 6.2 Limitations
+### 7.2 Limitations
 
-* The datasets are limited to certain regions and are have not been expanded to further regions. Having data on more regions might allow us to look at more intra-migration incidents and more trafficking events.
+* The datasets are limited to certain regions and are have not been expanded to further regions of the world. Having data on more regions might allow us to look at more intra-migration incidents and more trafficking events.
 
 * The data is very limited in time, ie the data does not have enough records for data which is old. 
 
-### 6.3 Lessons Learned
+### 7.3 Lessons Learned
 
 * Learning D3
+ 
+* A major proportion of trafficked victims are young females. 
+
+* The most common form of exploitation of trafficked victims are sexual abuse(for females) and forced labour(for males). 
 
 * Most of the migration incidents take place in the Mediterranean and the US-Mexico border.
+
+### Link to the Github repository: https://github.com/ujjwal95/migration_and_human_trafficking
