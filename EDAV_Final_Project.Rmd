@@ -1,9 +1,12 @@
 ---
 title: "EDAV_Final_Project"
 author: "Akshata Patel, Kiran Saini, Ujjwal Peshin"
-date: "12/9/2018"
+date: "12/10/2018"
 output:
-  html_document: default
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
   pdf_document: default
   word_document: default
 ---
@@ -106,7 +109,7 @@ if(!require(colorblindr)){
 
 The issue that we wanted to target was the current migrant and human trafficking incidents around the world. Data on human trafficking and migrant incidents is useful for analysing the trends between countries and developing ways to prevent these crimes of trafficking and exploitation.
 
-### 1.1 Why we chose this topic. 
+### 1.1 Why we chose this topic 
 
 The primary interest of us choosing this topic to work on was to understand how human trafficking and migration incidents are affecting the world and how big of an issue it is to the world. There are approximately 258 million people not living in their country of birth. Due to the sudden rise in hostility to migration, the illegal routes of human trafficking are becoming more and more prominent. 
 
@@ -116,9 +119,9 @@ Some of the questions that we wanted to explore with this data were as follows:
 * Which countries face the most illegal trafficking and which countries do people traffick to the most.
 * Is there any trend in the victims that are trafficked.
 * How have the traffcking trends changed over time.
-and so on...
 
-### 1.2 Team Members and contributions:
+
+### 1.2 Team Members and contributions
 
 * Akshata Patel: Akshata worked on the exploratory data analysis of the human trafficking dataset.
 * Kiran Saini: Kiran worked on creating the interactive component of the project using D3.
@@ -240,17 +243,17 @@ The dataset starts from 2014 and extendes to December 2018.
 data <- read.csv("./data/MissingMigrants-Global-2018-12-07T06-09-54.csv", na.strings = "")
 ```
 
-### 3.2.1 We can have a look at the structure of the dataset,
+#### 3.2.1 We can have a look at the structure of the dataset,
 ```{r}
 str(data)
 ```
 
-### 3.2.2 The dataset contains a lot of NAs due to the sources of data not having that complete information, with the columns Number.of.Children and Minimum.Estimated.Number.of.Missing having the most missing values. Also, the most prevalent missing pattern is the pattern where the Number.of.Children, Minimum.Estimated.Number.of.Missing, Number.of.Females, Number.of.Survivors, URL(URL of source), and Migration.Route are missing,
+#### 3.2.2 The dataset contains a lot of NAs due to the sources of data not having that complete information, with the columns Number.of.Children and Minimum.Estimated.Number.of.Missing having the most missing values. Also, the most prevalent missing pattern is the pattern where the Number.of.Children, Minimum.Estimated.Number.of.Missing, Number.of.Females, Number.of.Survivors, URL(URL of source), and Migration.Route are missing,
 ```{r fig.width=10, fig.height=7}
 extracat::visna(data, sort = 'b')
 ```
 
-### 3.2.3 Also, the data contains the coordinates of each incident, but together in a combined form, as (10,-10), and they were split into their own columns, 
+#### 3.2.3 Also, the data contains the coordinates of each incident, but together in a combined form, as (10,-10), and they were split into their own columns, 
 ```{r eval=FALSE}
 data <- separate(data = data, col = Location.Coordinates, into = c("coord.y", "coord.x"), sep = ",")
 ```
@@ -260,7 +263,7 @@ Some of these coordinates are not valid, ie, latitude greater than 90 or less th
 data <- subset(data , coord.y > -90 & coord.y < 90 & coord.x > -180 & coord.y < 180)
 ```
 
-### 3.2.4 The dataset, even though it contained the coordinates, it did not contain a mapping from those coordindates to the continents that they belong to, and that was extracted,
+#### 3.2.4 The dataset, even though it contained the coordinates, it did not contain a mapping from those coordindates to the continents that they belong to, and that was extracted,
 ```{r eval = FALSE}
 coords2continent = function(points)
 {  
@@ -714,7 +717,7 @@ ggplot() +
 As can be seen, the most fatal migration route is the Central Mediterranean, followed by route from the Central America to the US. The numbers might be population biased, as a huge number of people migrate along that route. Also, due to the rough Mediterranean Sea, it would be dangerous to cross over from Africa to Europe.
 
 The above hypothesis can be corroborated by the below graph, where we can see that the most dangerous migration route is the Central Mediterranean, and the biggest cause of death along that route is Drowning,
-```{r fig.width=10, fig.height= 7}
+```{r fig.width=11, fig.height= 7}
 small_data <- aggregate(Total.Dead.and.Missing ~Migration.Route + Cause.of.Death, data, sum)
 
 ggplot() + 
@@ -1113,7 +1116,7 @@ mapWorld <- borders("world", colour="gray50", fill="gray50")
 ggplot() +
   mapWorld +
   geom_point(data = data, aes(x = as.numeric(coord.x), y = as.numeric(coord.y), size = Total.Dead.and.Missing), color = 'light blue', fill = 'black', stroke = 0, alpha = 0.7) + 
-  ggtitle("The Mediterranean region and US-Mexico border seem to be very active") +
+  ggtitle("The Mediterranean and US-Mexico border are very active") +
   theme_gdocs(16) +
   theme(legend.position="bottom",legend.direction="horizontal") +
   theme(plot.title = element_text(size = 24, face = "bold")) +
